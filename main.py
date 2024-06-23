@@ -21,7 +21,7 @@ def clear():
 def charStatsMod(charClass):
   charClass = charClass.lower()
   if charClass in ["warrior"]:
-    healthMod = 1.8
+    healthMod = 2
     attackBonus = 3
     range = 0
     magicChance = 0
@@ -93,7 +93,7 @@ def characterGenerator():
 # subroutine that handles the combat system
 def combat (char1Name, char1Health, char1Str, char1Range, char1MagicChance, char2Name, char2Health, char2Str, char2Range, char2MagicChance):
   print ("The fight begins! Characters start at the opposite corners of the arena.")
-  distance = 4
+  distance = 5
   round = 0
   while True:
     char1Dmg = random.randint(1,3) + char1Str

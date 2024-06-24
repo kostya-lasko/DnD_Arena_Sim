@@ -29,7 +29,7 @@ def charStatsMod(charClass):
     healthMod = 0.8
     attackBonus = 0
     range = 2
-    magicChance = random.randint(1,20)/100 + 0.4
+    magicChance = random.randint(1,20)/100 + 0.6
   elif charClass in ["ranger"]:
     healthMod = 1
     attackBonus = 1
@@ -48,11 +48,11 @@ def magicBurst(characterMagicChance):
     # print ("This character explodes with magic!")
     magicType = random.randint(1,2)
     if magicType == 1:
-      magicDamage = random.randint(1,4) + 1
+      magicDamage = random.randint(1,3) + 1
       magicHealing = 0
     if magicType == 2:
       magicDamage = 0
-      magicHealing = random.randint(1,4) + 1
+      magicHealing = random.randint(1,3) + 1
     return (magicDamage, magicHealing)
   else:
     return 0, 0 
@@ -71,7 +71,7 @@ def characterGenerator():
     characterHealth = int(((random.randint(2,6) + random.randint(2,6))*healthMod + 20))
     characterStr = int((random.randint(1,3) + attackBonus))
     characterRange = int(range)
-    characterAttackBonus = int(attackBonus)
+    #characterAttackBonus = int(attackBonus)
     characterMagicChance = float(magicChance)
     print ("Generating awesome stats for this amazing character... ")
     time.sleep(1)
@@ -114,7 +114,7 @@ def combat (char1Name, char1Health, char1Str, char1Range, char1MagicChance, char
     # check for magic bursts
     char1MagicDamage, char1MagicHealing = magicBurst(char1MagicChance)
     if char1MagicDamage > 0:
-      print (Colors.OKCYAN + char1Name + " explodes with magic dealing " + str(char1MagicDamage) + " damage" + Colors.ENDC)
+      print (Colors.OKCYAN + char1Name + " magic surge goes wild dealing " + str(char1MagicDamage) + " damage" + Colors.ENDC)
       char2Health = char2Health - char1MagicDamage
       time.sleep(1)
     if char1MagicHealing > 0:
@@ -123,16 +123,16 @@ def combat (char1Name, char1Health, char1Str, char1Range, char1MagicChance, char
     char2MagicDamage, char2MagicHealing = magicBurst(char2MagicChance)
     if char2MagicDamage > 0:
       print (Colors.OKCYAN + char2Name + " explodes with magic dealing " + str(char2MagicDamage) + " damage" + Colors.ENDC)
-      char1Health = char1Health - char1MagicDamage
+      char1Health = char1Health - char2MagicDamage
     if char2MagicHealing > 0:
-      print (Colors.OKCYAN + "Magic energies gather around " + char2Name + " healing them for " + str(char2MagicHealing) + " health" + Colors.ENDC)
+      print (Colors.OKCYAN + "Magic swirls around " + char2Name + " healing them for " + str(char2MagicHealing) + " health" + Colors.ENDC)
       char2Health = char2Health + char2MagicHealing
       time.sleep(1)
 
     
     # melee combat
     if distance == 0:
-      print ("Both combatants clash in melee!")
+      print (Colors.BOLD  + "Both combatants clash in melee!" + Colors.ENDC)
       print (char1Name + " attacks dealing " + str(char1Dmg) + " damage")
       char2Health = char2Health - char1Dmg
       time.sleep(0.5)
@@ -151,11 +151,14 @@ def combat (char1Name, char1Health, char1Str, char1Range, char1MagicChance, char
       print (Colors.FAIL + char1Name + " falls on the ground" + Colors.ENDC)
       if char2Health > 0:
         print (char2Name + " stands victorious!")
+        print (char2Name + " has " + Colors.OKGREEN + str(char2Health) + Colors.ENDC + " health remaining")
         break
     elif char2Health <= 0:
       print (Colors.FAIL + char2Name + " falls on the ground" + Colors.ENDC)
+      
       if char1Health > 0:
         print (char1Name + " wins this fight!")
+        print (char1Name + " has " + Colors.OKGREEN + str(char1Health) + Colors.ENDC + " health remaining")
         break    
     
     round += 1   
@@ -179,7 +182,7 @@ print ()
 char2Name, char2Class, char2Health, char2Str, char2Range, char2MagicChance = characterGenerator()
 print (char2Name + " is gathering their strength...")
 print()
-time.sleep(3)
+time.sleep(2)
 # clear()
 
 #let them fight!

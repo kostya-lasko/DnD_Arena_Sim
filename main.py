@@ -76,10 +76,10 @@ def combat_round(attacker, defender, distance):
     
    #magic burst calling
     magic_type, magic_value = magic_burst(attacker)
-    if magic_type == "damage" and attacker.health > 0:
+    if magic_type == "damage":
         print(f"{Colors.OKCYAN}{attacker.name} unleashes their magic {magic_value} damage!{Colors.ENDC}")
         defender.health -= magic_value
-    elif magic_type == "healing" and attacker.health > 0:
+    elif magic_type == "healing":
         print(f"{Colors.OKCYAN}{attacker.name} is surrounded by healing energies, restoring {Colors.OKGREEN}{magic_value}{Colors.ENDC} health!{Colors.ENDC}")
         attacker.health += magic_value
 

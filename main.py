@@ -25,9 +25,9 @@ class Character:
         elif self.char_class == "ranger":
             return (int((random.randint(2,6) + random.randint(2,6)) * 1.2 + 15), 1, 6, random.randint(1,20)/100 + 0.02, 0, 0, 1)
         elif self.char_class == "mage":
-            return (int((random.randint(2,6) + random.randint(2,6)) * 0.8 + 15), 0, 2, random.randint(1,20)/100 + 0.8, 0, 0, 1)
-        elif self.char_class == "barb":
-            return (int((random.randint(2,6) + random.randint(2,6)) * 2.6 + 15), 4, 0, 0, 0, 2, 1)
+            return (int((random.randint(2,6) + random.randint(2,6)) * 0.8 + 15), 0, 3, random.randint(1,20)/100 + 0.8, 0, 0, 1)
+        #elif self.char_class == "barb":
+        #    return (int((random.randint(2,6) + random.randint(2,6)) * 2.6 + 15), 4, 0, 0, 0, 1, 1)
         elif self.char_class == "monk":
             return (int((random.randint(2,6) + random.randint(2,6)) * 1.5 + 15), 1, 0, 0, 0, 0, 3)
         
@@ -73,13 +73,13 @@ def combat_round(attacker, defender, distance):
                 print (f"{defender.name}'s armor blocked some incoming damage!")
             defender.health = defender.health - (damage - armor)
             defender.health = defender.health - (damage2 - armor)
-   
+    
    #magic burst calling
     magic_type, magic_value = magic_burst(attacker)
-    if magic_type == "damage":
+    if magic_type == "damage" and attacker.health > 0:
         print(f"{Colors.OKCYAN}{attacker.name} unleashes their magic {magic_value} damage!{Colors.ENDC}")
         defender.health -= magic_value
-    elif magic_type == "healing":
+    elif magic_type == "healing" and attacker.health > 0:
         print(f"{Colors.OKCYAN}{attacker.name} is surrounded by healing energies, restoring {Colors.OKGREEN}{magic_value}{Colors.ENDC} health!{Colors.ENDC}")
         attacker.health += magic_value
 
@@ -88,50 +88,41 @@ def combat(char1, char2):
     print("The fight begins! Characters start at the opposite corners of the arena.")
     distance = 5
     round_num = 0
+    if char1.range == 0 and char2.range == 0:
+      distance -= 1
+    #Removing everything related to Barbarian
+    #def check_revival(character):
+     #   if character.health <= 0 and character.rage > 0:
+     #       print(f"Wait! {character.name}'s inner rage allows them to stand back!")
+     #       character.health = 1
+      #      character.rage -= 1
+       #     return True
+        #return False
+
     while char1.health > 0 and char2.health > 0:
-        round_num += 1
-        print(f"\n{Colors.BOLD}Round {round_num}{Colors.ENDC}")
+      round_num += 1
+      print(f"\n{Colors.BOLD}Round {round_num}{Colors.ENDC}")
 
-        combat_round(char1, char2, distance)
-        #if char2.health > 0:
-        combat_round(char2, char1, distance)
-        if distance > 0:
-            print("Fighters are getting closer to each other")
-            distance -= 1
-            
-        print(f"{char1.name} has {Colors.OKGREEN}{char1.health}{Colors.ENDC} health left")
-        print(f"{char2.name} has {Colors.OKGREEN}{char2.health}{Colors.ENDC} health left")
-        
-        time.sleep(2)
-   
-    #checking if anyone died
-    if char1.health <= 0 and char2.health <= 0:
-        print(f"{Colors.FAIL}Both combatants fall. It's a draw!{Colors.ENDC}")
-        if char1.rage > 1:
-            print(f"Wait! {char1.name}'s inner rage allows them to stand back!")
-            char1.health = 1
-            char1.rage -= 1
-            combat_round(char1, char2, distance)
-        elif char2.rage > 1:
-            print(f"Wait! {char2.name}'s inner rage allows them to stand back!")
-            char2.health = 1
-            char2.rage -= 1
-            combat_round(char2, char1, distance)
-    elif char1.health <= 0:
-        print(f"{Colors.FAIL}{char1.name} falls. {char2.name} is victorious with {Colors.OKGREEN}{char2.health}{Colors.ENDC} health remaining!{Colors.ENDC}")
-        if char1.rage > 1:
-            print(f"Wait! {char1.name}'s inner rage allows them to stand back!")
-            char1.health = 1
-            char1.rage -= 1
-            combat_round(char1, char2, distance)
-    else:
-        print(f"{Colors.FAIL}{char2.name} falls. {char1.name} is victorious with {Colors.OKGREEN}{char1.health}{Colors.ENDC} health remaining!{Colors.ENDC}")
-        if char2.rage > 1:
-            print(f"Wait! {char2.name}'s inner rage allows them to stand back!")
-            char2.health = 1
-            char2.rage -= 1
-            combat_round(char2, char1, distance)
+      #I want both combatants to attack simultenously, not one by one. 
+      combat_round(char1, char2, distance)
+      combat_round(char2, char1, distance)
+      
+      if distance > 0:
+          print("Fighters are getting closer to each other")
+          distance -= 1
 
+      print(f"{char1.name} has {Colors.OKGREEN}{char1.health}{Colors.ENDC} health left")
+      print(f"{char2.name} has {Colors.OKGREEN}{char2.health}{Colors.ENDC} health left")
+      
+      if char1.health <= 0 and char2.health <= 0:
+          print(f"{Colors.FAIL}Both combatants fall. It's a draw!{Colors.ENDC}")
+      elif char1.health <= 0:
+          print(f"{Colors.FAIL}{char1.name} falls. {char2.name} is victorious with {Colors.OKGREEN}{char2.health}{Colors.ENDC} health remaining!{Colors.ENDC}")
+          
+      elif char2.health <= 0:
+          print(f"{Colors.FAIL}{char2.name} falls. {char1.name} is victorious with {Colors.OKGREEN}{char1.health}{Colors.ENDC} health remaining!{Colors.ENDC}")
+
+      time.sleep(2)
    
 
 #main program

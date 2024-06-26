@@ -129,7 +129,7 @@ def combat(char1, char2):
 def create_character(player_number):
     print(f"Player {player_number}, create your character!")
     name = input("Name your character: ")
-    char_class = input("Select your character class (warrior, mage, ranger, barb, monk): ").lower().strip()
+    char_class = input("Select your character class (warrior, mage, ranger, monk): ").lower().strip()
     return Character(name, char_class)
 
 def main():

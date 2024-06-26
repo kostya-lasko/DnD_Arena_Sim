@@ -1,6 +1,4 @@
-import random
-import time
-import os
+import random, os, time
 
 #adding a class for colours
 class Colors:
@@ -14,175 +12,149 @@ class Colors:
   BOLD = '\033[1m'
   UNDERLINE = '\033[4m'
 
-def clear():
-  os.system('clear')
-  
-#this subroutine changes the character stats based on their class
-def charStatsMod(charClass):
-  charClass = charClass.lower()
-  if charClass in ["warrior"]:
-    healthMod = 2.2
-    attackBonus = 3
-    range = 0
-    magicChance = 0
-  elif charClass in ["mage"]:
-    healthMod = 0.8
-    attackBonus = 0
-    range = 2
-    magicChance = random.randint(1,20)/100 + 0.6
-  elif charClass in ["ranger"]:
-    healthMod = 1
-    attackBonus = 1
-    range = 4
-    magicChance = random.randint(0,10)/100 + 0.02
-  else:
-    print (Colors.WARNING + "This is an unknown class." + Colors.ENDC)
-    return None, None, None, None
-  return (healthMod, attackBonus, range, magicChance)
+#character creation class
+class Character:
+    def __init__ (self, name, char_class):
+        self.name = name
+        self.char_class = char_class.lower()
+        self.health, self.damage, self.range, self.magic_chance, self.armor, self.rage, self.attacks_number = self.set_stats()
+   #sets stats based on the character class 
+    def set_stats(self):
+        if self.char_class == "warrior":
+            return (int((random.randint(2,6) + random.randint(2,6)) * 2 + 15), 3, 0, 0, 1, 0, 1)
+        elif self.char_class == "ranger":
+            return (int((random.randint(2,6) + random.randint(2,6)) * 1.2 + 15), 1, 6, random.randint(1,20)/100 + 0.02, 0, 0, 1)
+        elif self.char_class == "mage":
+            return (int((random.randint(2,6) + random.randint(2,6)) * 0.8 + 15), 0, 2, random.randint(1,20)/100 + 0.8, 0, 0, 1)
+        elif self.char_class == "barb":
+            return (int((random.randint(2,6) + random.randint(2,6)) * 2.6 + 15), 4, 0, 0, 0, 2, 1)
+        elif self.char_class == "monk":
+            return (int((random.randint(2,6) + random.randint(2,6)) * 1.5 + 15), 1, 0, 0, 0, 0, 3)
+        
+    def display_stats(self):
+        print(f"{Colors.OKCYAN}Name: {self.name}")
+        print(f"Class: {self.char_class}")
+        print(f"HP: {self.health}")
+        print(f"Attack Bonus: {self.damage}")
+        print(f"Attack range: {self.range}")
+        print(f"Magic Chance: {self.magic_chance}{Colors.ENDC}")
 
+#magic burst
+def magic_burst(character):
+    if random.random() <= character.magic_chance:
+        magic_type = random.choice(["damage", "healing"])
+        value = random.randint(1, 4)+1
+        return magic_type, value
+    return None, 0
 
-# this subroutine handles how magic works
-def magicBurst(characterMagicChance):
-  magicHappened = random.randint(1,100)
-  if magicHappened <= characterMagicChance*100:  
-    # print ("This character explodes with magic!")
-    magicType = random.randint(1,2)
-    if magicType == 1:
-      magicDamage = random.randint(1,3) + 1
-      magicHealing = 0
-    if magicType == 2:
-      magicDamage = 0
-      magicHealing = random.randint(1,3)
-    return (magicDamage, magicHealing)
-  else:
-    return 0, 0 
-
-
-#this subroutine lets your create your character     
-def characterGenerator():
-  characterName = input ("Name your character: ")
-  time.sleep(0.1)
-  characterClass = input ("Select your character class: (warrior, mage, ranger) ").lower().strip()
-  time.sleep(0.2)
-  healthMod, attackBonus, range, magicChance = charStatsMod(characterClass)
-  
-  # setting character stats: health, str, range and magic chance
-  characterHealth = int(((random.randint(2,6) + random.randint(2,6))*healthMod + 20))
-  characterStr = int((random.randint(1,3) + attackBonus))
-  characterRange = int(range)
-  #characterAttackBonus = int(attackBonus)
-  characterMagicChance = float(magicChance)
-  print ("Generating awesome stats for this amazing character... ")
-  time.sleep(1)
-  print (Colors.OKCYAN + f"Your character's name is {characterName}")
-  time.sleep(0.33)
-  print (f"Your character's class is {characterClass}")
-  time.sleep(0.33)
-  print (f"HP: {characterHealth}")
-  time.sleep(0.33)
-  print (f"STR: {characterStr}")
-  time.sleep(0.33)
-  print (f"Attack range:  {characterRange}")
-  time.sleep(0.33)
-  print (f"Magic Chance: {characterMagicChance}" + Colors.ENDC)
-  time.sleep(0.33)
-  return characterName, characterClass, characterHealth, characterStr, characterRange, characterMagicChance
-
-
-# subroutine that handles the combat system
-def combat (char1Name, char1Health, char1Str, char1Range, char1MagicChance, char2Name, char2Health, char2Str, char2Range, char2MagicChance):
-  print ("The fight begins! Characters start at the opposite corners of the arena.")
-  distance = 5
-  round = 0
-  while char1Health > 0 and char2Health > 0:
-    char1Dmg = random.randint(1,3) + char1Str
-    char2Dmg = random.randint(1,3) + char2Str
+#combat round
+def combat_round(attacker, defender, distance):
+    damage = random.randint(1,3) + attacker.damage
+    armor = defender.armor
+   #ranged attacks
     if distance > 0:
-      print ("Fighters are getting closer to each other")
-      distance = distance - 1
-    #check for ranged attacks
-      if char1Range > distance:
-        print (f"{char1Name} attacks at range dealing {char1Str} damage")
-        char2Health = char2Health - char1Dmg
-        time.sleep(0.5)
-      if char2Range > distance:
-        print (f"{char2Name} attacks at range dealing {char2Str} damage")
-        char1Health = char1Health - char2Dmg
-        time.sleep(0.5)
+        if attacker.range > distance:
+            print(f"{attacker.name} attacks at range dealing {Colors.WARNING}{damage-armor} damage.{Colors.ENDC}")
+            defender.health = defender.health - (damage - armor)
+            if armor > 0:
+                print (f"{defender.name}'s armor blocked some incoming damage!")
     
-    # check for magic bursts
-    char1MagicDamage, char1MagicHealing = magicBurst(char1MagicChance)
-    if char1MagicDamage > 0:
-      print (Colors.OKCYAN + f"{char1Name} magic surge goes wild dealing {char1MagicDamage} damage" + Colors.ENDC)
-      char2Health = char2Health - char1MagicDamage
-      time.sleep(1)
-    if char1MagicHealing > 0:
-      print (Colors.OKCYAN + f"Magic energies gather around {char1Name} healing them for {char1MagicHealing} health" + Colors.ENDC)
-      char1Health = char1Health + char1MagicHealing
-    char2MagicDamage, char2MagicHealing = magicBurst(char2MagicChance)
-    if char2MagicDamage > 0:
-      print (Colors.OKCYAN + f"{char2Name} explodes with magic dealing {char2MagicDamage} damage" + Colors.ENDC)
-      char1Health = char1Health - char2MagicDamage
-    if char2MagicHealing > 0:
-      print (Colors.OKCYAN + f"Magic swirls around {char2Name} healing them for {char2MagicHealing} health" + Colors.ENDC)
-      char2Health = char2Health + char2MagicHealing
-      time.sleep(1)
+    #melee attacks
+    else:
+        print(f"{attacker.name} strikes in melee dealing {Colors.WARNING}{damage-armor} damage.{Colors.ENDC}")
+        defender.health = defender.health - (damage - armor)
+        if armor > 0:
+                print (f"{defender.name}'s armor blocked some incoming damage!")
+        if attacker.attacks_number > 1:
+            damage = random.randint(1,3) + attacker.damage  
+            damage2 = random.randint(1,3) + attacker.damage  
+            print(f"Fast as a lightning, {attacker.char_class} attacks {attacker.attacks_number-1} more times! They deal {Colors.WARNING}{damage-armor}{Colors.ENDC} damage and then {Colors.WARNING}{damage2-armor}{Colors.ENDC} more damage!")
+            if armor > 0:
+                print (f"{defender.name}'s armor blocked some incoming damage!")
+            defender.health = defender.health - (damage - armor)
+            defender.health = defender.health - (damage2 - armor)
+   
+   #magic burst calling
+    magic_type, magic_value = magic_burst(attacker)
+    if magic_type == "damage":
+        print(f"{Colors.OKCYAN}{attacker.name} unleashes their magic {magic_value} damage!{Colors.ENDC}")
+        defender.health -= magic_value
+    elif magic_type == "healing":
+        print(f"{Colors.OKCYAN}{attacker.name} is surrounded by healing energies, restoring {Colors.OKGREEN}{magic_value}{Colors.ENDC} health!{Colors.ENDC}")
+        attacker.health += magic_value
 
-    
-    # melee combat
-    if distance == 0:
-      print (Colors.BOLD  + "Both combatants clash in melee!" + Colors.ENDC)
-      print (f"{char1Name} attacks dealing {char1Dmg} damage")
-      char2Health = char2Health - char1Dmg
-      time.sleep(0.5)
-      print (f"{char2Name} hits back dealing {char2Dmg} damage")
-      char1Health = char1Health - char2Dmg
-      #print (f"{char1Name} has " + Colors.OKGREEN + f"{char1Health}" + Colors.ENDC + " health remaining")
-      #print (f"{char2Name} has " + Colors.OKGREEN + f"{char2Health}" + Colors.ENDC + " health remaining")
-      #print ()
+#combat subroutine
+def combat(char1, char2):
+    print("The fight begins! Characters start at the opposite corners of the arena.")
+    distance = 5
+    round_num = 0
+    while char1.health > 0 and char2.health > 0:
+        round_num += 1
+        print(f"\n{Colors.BOLD}Round {round_num}{Colors.ENDC}")
 
-    
-    #check if anyone died or if both are dead
-    if char1Health <= 0 and char2Health <= 0:
-      print (Colors.FAIL + "Both combatants fall on the ground. It's a draw!" + Colors.ENDC)
-      break
-    if char1Health <= 0:
-      print (Colors.FAIL + char1Name + " falls on the ground" + Colors.ENDC)
-      if char2Health > 0:
-        print (f"{char2Name} stands victorious!")
-        print (f"{char2Name} has " + Colors.OKGREEN + f"{char2Health}" + Colors.ENDC + " health remaining")
-        break
-    elif char2Health <= 0:
-      print (Colors.FAIL + f"{char2Name} falls on the ground" + Colors.ENDC)
-      
-      if char1Health > 0:
-        print (f"{char1Name} wins this fight!")
-        print (f"{char1Name} has " + Colors.OKGREEN + f"{char1Health}" + Colors.ENDC + " health remaining")
-        break    
-    
-    round += 1   
-    print (char1Name + " has " + Colors.OKGREEN + str(char1Health) + Colors.ENDC + " health left")
-    print (char2Name + " has " + Colors.OKGREEN + str(char2Health)  + Colors.ENDC +  " health left" + Colors.ENDC)
-    print ("End of round", round)
-    print ()  
-    time.sleep(3)
+        combat_round(char1, char2, distance)
+        #if char2.health > 0:
+        combat_round(char2, char1, distance)
+        if distance > 0:
+            print("Fighters are getting closer to each other")
+            distance -= 1
+            
+        print(f"{char1.name} has {Colors.OKGREEN}{char1.health}{Colors.ENDC} health left")
+        print(f"{char2.name} has {Colors.OKGREEN}{char2.health}{Colors.ENDC} health left")
+        
+        time.sleep(2)
+   
+    #checking if anyone died
+    if char1.health <= 0 and char2.health <= 0:
+        print(f"{Colors.FAIL}Both combatants fall. It's a draw!{Colors.ENDC}")
+        if char1.rage > 1:
+            print(f"Wait! {char1.name}'s inner rage allows them to stand back!")
+            char1.health = 1
+            char1.rage -= 1
+            combat_round(char1, char2, distance)
+        elif char2.rage > 1:
+            print(f"Wait! {char2.name}'s inner rage allows them to stand back!")
+            char2.health = 1
+            char2.rage -= 1
+            combat_round(char2, char1, distance)
+    elif char1.health <= 0:
+        print(f"{Colors.FAIL}{char1.name} falls. {char2.name} is victorious with {Colors.OKGREEN}{char2.health}{Colors.ENDC} health remaining!{Colors.ENDC}")
+        if char1.rage > 1:
+            print(f"Wait! {char1.name}'s inner rage allows them to stand back!")
+            char1.health = 1
+            char1.rage -= 1
+            combat_round(char1, char2, distance)
+    else:
+        print(f"{Colors.FAIL}{char2.name} falls. {char1.name} is victorious with {Colors.OKGREEN}{char1.health}{Colors.ENDC} health remaining!{Colors.ENDC}")
+        if char2.rage > 1:
+            print(f"Wait! {char2.name}'s inner rage allows them to stand back!")
+            char2.health = 1
+            char2.rage -= 1
+            combat_round(char2, char1, distance)
 
-#calling the character generator subroutine
-print ("Player 1, you will now create your character!")
-print ()
-char1Name, char1Class, char1Health, char1Str, char1Range, char1MagicChance= characterGenerator()
-print (char1Name + " is getting ready for the fight...")
-print()
-time.sleep(2)
-# clear()
+   
 
-print ("Player 2, you will now create your character!")
-print ()
-char2Name, char2Class, char2Health, char2Str, char2Range, char2MagicChance = characterGenerator()
-print (char2Name + " is gathering their strength...")
-print()
-time.sleep(2)
-# clear()
+#main program
+def create_character(player_number):
+    print(f"Player {player_number}, create your character!")
+    name = input("Name your character: ")
+    char_class = input("Select your character class (warrior, mage, ranger, barb, monk): ").lower().strip()
+    return Character(name, char_class)
 
-#let them fight!
-combat(char1Name, char1Health, char1Str, char1Range, char1MagicChance, char2Name, char2Health, char2Str, char2Range, char2MagicChance)
+def main():
+    char1 = create_character(1)
+    print("\nCharacter 1 stats:")
+    char1.display_stats()
+    time.sleep(2)
+
+    char2 = create_character(2)
+    print("\nCharacter 2 stats:")
+    char2.display_stats()
+    time.sleep(2)
+
+    #input("\nPress Enter to start the combat...")
+    #clear()
+    combat(char1, char2)
+
+if __name__ == "__main__":
+    main()

@@ -88,7 +88,7 @@ class Character:
                     print(f"{self.name} hits {enemy.name}'s weak spot from the distance, {Colors.FAIL}critting{Colors.ENDC} for {Colors.WARNING}{damage}{Colors.ENDC} damage!")
                 else:
                     damage = max(0, damage - enemy.armor)
-                    print(f"{self.name} attacks {enemy.name} for {Colors.WARNING}{damage}{Colors.ENDC} damage from a far!")
+                    print(f"{self.name} uses the distance and shoots {enemy.name} for {Colors.WARNING}{damage}{Colors.ENDC} damage from a far!")
                 enemy.health -= damage
         elif distance > 0 and self.range < distance:
             print(f"{self.name} is too far to attack {enemy.name}. They rush forward, eager for a fight!")
@@ -267,7 +267,7 @@ It allows 2 players to select their characters and watch how they fight to the d
         if not player2.is_alive():
             print(f"{Colors.FAIL}{player2.name} has been defeated!{Colors.ENDC} {player1.name} wins!")
             if not player1.is_alive():
-                print(f"But wait a second! {player1.name} {Colors.FAIL} slowly falls to the ground too!{Colors.ENDC} IT IS A DRA-A-A-A-W!")
+                print(f"But wait a second! {player1.name} {Colors.FAIL} slowly falls to the ground too!{Colors.ENDC} IT IS A DRA-A-A-A-A-A-A-W!")
                 break
             print(f"{player1.name} has {Colors.OKGREEN}{player1.health}{Colors.ENDC} health left.")
             break
@@ -275,7 +275,7 @@ It allows 2 players to select their characters and watch how they fight to the d
         if not player1.is_alive():
             print(f"{Colors.FAIL}{player1.name} has been defeated!{Colors.ENDC} {player2.name} wins!")
             if not player2.is_alive():
-                print(f"But wait a second! {player2.name}{Colors.FAIL} slowly falls to the ground too!{Colors.ENDC} It's a draw!")
+                print(f"But wait a second! {player2.name}{Colors.FAIL} slowly falls to the ground too!{Colors.ENDC} IT IS A DRA-A-A-A-A-A-A-W!")
                 break
             print(f"{player2.name} has {Colors.OKGREEN}{player2.health}{Colors.ENDC} health left.")
             break

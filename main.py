@@ -1,5 +1,6 @@
 import random, os, time
 
+
 #adding a class for colours
 class Colors:
   HEADER = '\033[95m'
@@ -12,154 +13,286 @@ class Colors:
   BOLD = '\033[1m'
   UNDERLINE = '\033[4m'
 
-#character creation class
+#a class for different intros
+class Introductions:
+    def __init__ (self, player_name, player_class):
+        self.player_class = player_class
+        self.player_name = player_name
+    def greet(self):
+        greetings = {
+            "Fighter": f"Welcome, {self.player_name} the armored {self.player_class}! May your skills bring you victory.",
+            "Mage": f"Greetings, {self.player_name} the wise {self.player_class}! May your knowledge bring you enlightenment.",
+            "Rogue": f"Hello, {self.player_name} the sneaky {self.player_class}! May your cunning bring you success.",
+            "Barbarian": f"Hey, {self.player_name} the smashing {self.player_class}! May your power destroy your foes.",
+            "Ranger": f"Good day, {self.player_name} the swift {self.player_class}! May your aim be true.",
+            "Monk": f"Blessings, {self.player_name} the stoic {self.player_class}! May your calm mind aid you in this fight."
+            }
+        return greetings.get(self.player_class)
+
+#character creation main class
 class Character:
-    def __init__ (self, name, char_class):
+    def __init__ (self, name, char_class, health_mod):
         self.name = name
-        #self.char_class = char_class.lower()
-        self.health = (int((random.randint(2,6) + random.randint(2,6))* + 15))
-        self.damage = 0
+        self.char_name = char_class
+        self.health = int((random.randint(10,20)) * health_mod + 15)
+        self.damage_bonus = 1
         self.attacks_number = 1
         self.range = 0
         self.magic_chance = 0
         self.armor = 0
         self.rage = 0
-        self.parry = 0
-     #   , self.range, self.magic_chance, self.armor, self.rage, self.attacks_number = self.set_stats()
-   #sets stats based on the character class 
-    def set_stats(self):
-        if self.char_class == "warrior":
-            return (int((random.randint(2,6) + random.randint(2,6)) * 2 + 15), 3, 0, 0, 1, 0, 1)
-        elif self.char_class == "ranger":
-            return (int((random.randint(2,6) + random.randint(2,6)) * 1.2 + 15), 1, 6, random.randint(1,20)/100 + 0.02, 0, 0, 1)
-        elif self.char_class == "mage":
-            return (int((random.randint(2,6) + random.randint(2,6)) * 0.8 + 15), 0, 3, random.randint(1,20)/100 + 0.8, 0, 0, 1)
-        #elif self.char_class == "barb":
-        #    return (int((random.randint(2,6) + random.randint(2,6)) * 2.6 + 15), 4, 0, 0, 0, 1, 1)
-        elif self.char_class == "monk":
-            return (int((random.randint(2,6) + random.randint(2,6)) * 1.5 + 15), 1, 0, 0, 0, 0, 3)
+        self.crit_chance = random.randint(5,15)
+        self.crit_mode = 2
+    
+    #default damage for an attack
+    def standard_damage(self):
+        standard_damage = random.randint(1,6) + self.damage_bonus
+        is_crit = False
+        if random.random() <= self.crit_chance/100:
+            is_crit = True
+        return (standard_damage, is_crit)
+
+    # Magic burst
+    def magic_burst(self):
+        if random.random() < self.magic_chance/100:
+            magic_type = random.choice(["damage", "healing"])
+            value, placeholder = self.standard_damage() 
+            #value -= self.damage_bonus
+            return magic_type, value
+        return None, 0
+    
+
+    #ATTACK LOGIC
+    #first we trigger magic bursts
+    def attack_enemy(self, enemy, distance):
+        magic_type, value = self.magic_burst()
+        if magic_type == "damage":
+            enemy.health -= value
+            print(f"{self.name} bursts with etherial energy, dealing {Colors.OKCYAN}{value} magic damage{Colors.ENDC}!")
+        elif magic_type == "healing":
+            self.health += value
+            print(f"{self.name} is surrounded with magic and is healed for {Colors.OKGREEN}{value}{Colors.ENDC} health!")
+        #then we attack at range
+        if distance > 0 and self.range >= distance:
+            damage, is_crit = self.standard_damage()
+            if is_crit:
+                damage = max(0, damage*self.crit_mode - enemy.armor)
+                print(f"{self.name} hits {enemy.name}'s weak spot from the distance, {Colors.FAIL}critting{Colors.ENDC} for {Colors.WARNING}{damage}{Colors.ENDC} damage!")
+            else:
+                damage = max(0, damage - enemy.armor)
+                print(f"{self.name} attacks {enemy.name} for {Colors.WARNING}{damage}{Colors.ENDC} damage from a far!")
+            enemy.health -= damage
+        elif distance > 0 and self.range < distance:
+            print(f"{self.name} is too far to attack {enemy.name}. They rush forward, eager for a fight!")
         
-    def display_stats(self):
-        print(f"{Colors.OKCYAN}Name: {self.name}")
-        print(f"Class: {self.char_class}")
-        print(f"HP: {self.health}")
-        print(f"Attack Bonus: {self.damage}")
-        print(f"Attack range: {self.range}")
-        print(f"Magic Chance: {self.magic_chance}{Colors.ENDC}")
-
-#magic burst
-def magic_burst(character):
-    if random.random() <= character.magic_chance:
-        magic_type = random.choice(["damage", "healing"])
-        value = random.randint(1,4)+1
-        return magic_type, value
-    return None, 0
-
+        #and then attack in melee
+        elif distance == 0:
+            damage, is_crit = self.standard_damage()
+            if is_crit:
+                damage = max(0, damage*self.crit_mode - enemy.armor)
+                print(f"{self.name} {Colors.FAIL}crits{Colors.ENDC} {enemy.name}! They deal an astonoshing {Colors.WARNING}{damage}{Colors.ENDC} damage!")
+            else:
+                damage = max(0, damage - enemy.armor)
+                print(f"{self.name} attacks {enemy.name} for {Colors.WARNING}{damage}{Colors.ENDC} damage with a mighty strike!")
+            enemy.health -= damage
+        print(f"{enemy.name} has {Colors.OKGREEN}{enemy.health}{Colors.ENDC} health left.")
+    
+    #function to print character stats
+    def print_stats(self):
+        print(f"""{self.name}'s stats are:
+{Colors.OKGREEN}Health: {self.health}{Colors.ENDC}
+Attack bonus: {self.damage_bonus}
+Range: {self.range}
+Armor: {self.armor}
+Magic chance: {Colors.OKCYAN}{self.magic_chance}%{Colors.ENDC}
+Crit chance: {Colors.FAIL}{self.crit_chance}%{Colors.ENDC}
+""")    
+    #is alive
+    def is_alive(self):
+        return self.health > 0
+    
+    
 #Creating separate subsclasses for each of the classes to make their abilities more unique
+class Barbarian(Character):
+    def __init__ (self, name):
+        super().__init__ (name, "Barbarian", health_mod = 2.8)
+        self.damage_bonus = 3
+        self.rage = 1
+    
+    def is_alive(self):
+        if self.rage > 0 and self.health <= 0:
+            self.health = random.randint(5,18)
+            print (f"{Colors.FAIL}{self.name} is too angry to die!{Colors.ENDC} They stand back up with {Colors.OKGREEN}{self.health}{Colors.ENDC} health.")
+            self.rage -=1
+        return self.health > 0
+
 class Fighter(Character):
-    def __init__ (self, char_class):
-        self.char_class = char_class
+    def __init__ (self, name):
+        super().__init__ (name, "Fighter", health_mod = 2.4)
+        self.armor = 2
+        self.damage_bonus = 3
 
+class Mage(Character):
+    def __init__ (self, name):
+        super().__init__(name, "Mage",health_mod = 0.7)
+        self.range = 2
+        self.magic_chance = random.randint(49,69)+30
 
-#combat round
-def combat_round(attacker, defender, distance):
-    damage = random.randint(1,3) + attacker.damage
-    armor = defender.armor
-   #ranged attacks
-    if distance > 0:
-        if attacker.range > distance:
-            print(f"{attacker.name} attacks at range dealing {Colors.WARNING}{damage-armor} damage.{Colors.ENDC}")
-            defender.health = defender.health - (damage - armor)
-            if armor > 0:
-                print (f"{defender.name}'s armor blocked some incoming damage!")
+class Monk(Character):
+    def __init__ (self, name):
+        super().__init__(name, "Monk",health_mod = 2)
+        self.attacks_number = 3
+        self.damage_bonus = 0
+        
+    def attack_enemy(self, enemy, distance):
+        if distance > 0 and self.range < distance:
+            print(f"{self.name} is too far to attack {enemy.name}. They approach closer.")
+        elif distance == 0:
+            current_attacks = 1
+            while current_attacks <= self.attacks_number:
+                damage, is_crit = self.standard_damage()
+                if is_crit:
+                    damage = max(0, damage*self.crit_mode - enemy.armor)
+                    print(f"{self.name} hits {enemy.name}'s weak spot with extreme precision and {Colors.FAIL}crits{Colors.ENDC} for {Colors.WARNING}{damage}{Colors.ENDC} damage!")
+                else:
+                    damage = max(0, damage - enemy.armor)
+                    print(f"{self.name} attacks {enemy.name} {self.attacks_number} times with lightning fast strikes for {Colors.WARNING}{damage}{Colors.ENDC} damage!")
+                enemy.health -= damage
+                current_attacks += 1
+        print(f"{enemy.name} has {Colors.OKGREEN}{enemy.health}{Colors.ENDC} health left.")
+class Ranger(Character):
+    def __init__ (self, name):
+        super().__init__ (name, "Ranger",health_mod = 1.5)
+        self.damage_bonus = 2
+        self.range = 5
+        #self.magic_chance = random.randint(0,10)+2
+
+class Rogue(Character):
+    def __init__(self, name):
+        super().__init__ (name, "Rogue", health_mod = 1.8)
+        self.damage_bonus = 1
+        self.crit_chance = 0.60
+        self.crit_mode = 4
     
-    #melee attacks
-    else:
-        print(f"{attacker.name} strikes in melee dealing {Colors.WARNING}{damage-armor} damage.{Colors.ENDC}")
-        defender.health = defender.health - (damage - armor)
-        if armor > 0:
-                print (f"{defender.name}'s armor blocked some incoming damage!")
-        if attacker.attacks_number > 1:
-            damage = random.randint(1,3) + attacker.damage  
-            damage2 = random.randint(1,3) + attacker.damage  
-            print(f"Fast as a lightning, {attacker.char_class} attacks {attacker.attacks_number-1} more times! They deal {Colors.WARNING}{damage-armor}{Colors.ENDC} damage and then {Colors.WARNING}{damage2-armor}{Colors.ENDC} more damage!")
-            if armor > 0:
-                print (f"{defender.name}'s armor blocked some incoming damage!")
-            defender.health = defender.health - (damage - armor)
-            defender.health = defender.health - (damage2 - armor)
-    
-   #magic burst calling
-    magic_type, magic_value = magic_burst(attacker)
-    if magic_type == "damage":
-        print(f"{Colors.OKCYAN}{attacker.name} unleashes their magic {magic_value} damage!{Colors.ENDC}")
-        defender.health -= magic_value
-    elif magic_type == "healing":
-        print(f"{Colors.OKCYAN}{attacker.name} is surrounded by healing energies, restoring {Colors.OKGREEN}{magic_value}{Colors.ENDC} health!{Colors.ENDC}")
-        attacker.health += magic_value
+    """#redefining attack_enemy to include the crit chance
+    def attack_enemy(self, enemy, distance):
+        #we attack at range
+        if distance > 0 and self.range >= distance:
+            damage = max(0, self.standard_damage - enemy.armor)
+            enemy.health -= damage
+            print(f"{self.name} attacks {enemy.name} for {Colors.WARNING}{damage}{Colors.ENDC} damage from a far!")
+        elif distance > 0 and self.range < distance:
+            print(f"{self.name} is too far to attack {enemy.name}.")
+        #and then attack in melee with a crit chance
+        elif distance == 0:
+            if random.random() <= self.crit_chance:
+                damage = max(0, self.standard_damage() * self.crit_mod - enemy.armor)
+                print(f"{self.name} {Colors.FAIL}crits{Colors.ENDC} with their attack! They deal {Colors.WARNING}{damage}{Colors.ENDC} damage!")
+                enemy.health -= damage
+            else:
+                damage = max(0, self.standard_damage() - enemy.armor)
+                print(f"{self.name} attacks {enemy.name} for {Colors.WARNING}{damage}{Colors.ENDC} damage with a mighty strike!")
+                enemy.health -= damage"""
 
-#combat subroutine
-def combat(char1, char2):
-    print("The fight begins! Characters start at the opposite corners of the arena.")
-    distance = 5
-    round_num = 0
-    if char1.range == 0 and char2.range == 0:
-      distance -= 1
-    #Removing everything related to Barbarian
-    #def check_revival(character):
-     #   if character.health <= 0 and character.rage > 0:
-     #       print(f"Wait! {character.name}'s inner rage allows them to stand back!")
-     #       character.health = 1
-      #      character.rage -= 1
-       #     return True
-        #return False
-
-    while char1.health > 0 and char2.health > 0:
-      round_num += 1
-      print(f"\n{Colors.BOLD}Round {round_num}{Colors.ENDC}")
-
-      #I want both combatants to attack simultenously, not one by one. 
-      combat_round(char1, char2, distance)
-      combat_round(char2, char1, distance)
-      
-      if distance > 0:
-          print("Fighters are getting closer to each other")
-          distance -= 1
-
-      print(f"{char1.name} has {Colors.OKGREEN}{char1.health}{Colors.ENDC} health left")
-      print(f"{char2.name} has {Colors.OKGREEN}{char2.health}{Colors.ENDC} health left")
-      
-      if char1.health <= 0 and char2.health <= 0:
-          print(f"{Colors.FAIL}Both combatants fall. It's a draw!{Colors.ENDC}")
-      elif char1.health <= 0:
-          print(f"{Colors.FAIL}{char1.name} falls. {char2.name} is victorious with {Colors.OKGREEN}{char2.health}{Colors.ENDC} health remaining!{Colors.ENDC}")
-          
-      elif char2.health <= 0:
-          print(f"{Colors.FAIL}{char2.name} falls. {char1.name} is victorious with {Colors.OKGREEN}{char1.health}{Colors.ENDC} health remaining!{Colors.ENDC}")
-
-      time.sleep(2)
-   
-
-#main program
-def create_character(player_number):
-    print(f"Player {player_number}, create your character!")
-    name = input("Name your character: ")
-    char_class = input("Select your character class (warrior, mage, ranger, monk): ").lower().strip()
-    return Character(name, char_class)
+#allowing players to choose their class
+def choose_class(name):
+    classes = {
+        "1": Fighter,
+        "2": Monk,
+        "3": Mage,
+        "4": Ranger,
+        "5": Barbarian,
+        "6": Rogue
+    }
+    class_names = {
+        "1": "Fighter",
+        "2": "Monk",
+        "3": "Mage",
+        "4": "Ranger",
+        "5": "Barbarian",
+        "6": "Rogue"
+    }
+   #print("Choose your class:")
+    print(f"1. Fighter")
+    print(f"2. Monk")
+    print(f"3. Mage")
+    print(f"4. Ranger")
+    print(f"5. Barbarian")
+    print(f"6. Rogue")
+    choice = input("Enter the number of your choice: ")
+    return classes[choice](name), class_names[choice]
 
 def main():
-    char1 = create_character(1)
-    print("\nCharacter 1 stats:")
-    char1.display_stats()
-    time.sleep(2)
+    os.system("clear")
+    print(f"""{Colors.OKCYAN}Welcome to the DnD Combat Arena 2.0. 
+It allows 2 players to select their characters and watch how they fight to the death on our arena!{Colors.ENDC}""")
+    player1_name = input("Player 1, choose your character name: ")
+    print("Player 1, choose your character class: ")
+    player1, player1_class = choose_class(player1_name)
+    #os.system("clear")
+    introduction = Introductions(player1_name, player1_class)
+    print (introduction.greet())
+    player1.print_stats()
+   # print(f"""Their stats are:
+#Health: {Colors.OKGREEN}{player1.health}{Colors.ENDC}
+#Attack bonus: {player1.damage_bonus}
+#Range: {player1.range}
+#Armor: {player1.armor}
+#Magic chance: {Colors.OKCYAN}{player1.magic_chance}%{Colors.ENDC}
+#Crit chance: {Colors.FAIL}{player1.crit_chance}%{Colors.ENDC}
+#""")
 
-    char2 = create_character(2)
-    print("\nCharacter 2 stats:")
-    char2.display_stats()
+    player2_name = input("Player 2, choose your character name: ")
+    print("Player 2, choose your character class: ")
+    player2, player2_class = choose_class(player2_name)
+    introduction = Introductions(player2_name, player2_class)
+    print (introduction.greet())
+    player2.print_stats()
+   # print(f"""Their stats are:
+#Health: {Colors.OKGREEN}{player2.health}{Colors.ENDC}
+#Attack bonus: {player2.damage_bonus}
+#Range: {player2.range}
+#Armor: {player2.armor}
+#Magic chance: {Colors.OKCYAN}{player2.magic_chance}%{Colors.ENDC}
+#Crit chance: {Colors.FAIL}{player2.crit_chance}%{Colors.ENDC}
+#""")
+    time.sleep(3)
+   
+    print(f"{Colors.WARNING}Let the fight begin!{Colors.ENDC}")
+    print()
     time.sleep(2)
+    distance = 4
+    round = 1
+    while player1.is_alive() and player2.is_alive():
+        print()
+        print (f"{Colors.OKCYAN}Current round: {round}{Colors.ENDC}")
+       
+        player1.attack_enemy(player2, distance)
+        print()
+        player2.attack_enemy(player1, distance)
+        if not player2.is_alive():
+            print(f"{Colors.FAIL}{player2.name} has been defeated!{Colors.ENDC} {player1.name} wins!")
+            if not player1.is_alive():
+                print(f"But wait a second! {player1.name} {Colors.FAIL} slowly falls to the ground too!{Colors.ENDC} It's a draw!")
+                break
+            print(f"{player1.name} has {Colors.OKGREEN}{player1.health}{Colors.ENDC} health left.")
+            break
 
-    #input("\nPress Enter to start the combat...")
-    #clear()
-    combat(char1, char2)
+        if not player1.is_alive():
+            print(f"{Colors.FAIL}{player1.name} has been defeated!{Colors.ENDC} {player2.name} wins!")
+            if not player2.is_alive():
+                print(f"But wait a second! {player2.name}{Colors.FAIL} slowly falls to the ground too!{Colors.ENDC} It's a draw!")
+                break
+            print(f"{player2.name} has {Colors.OKGREEN}{player2.health}{Colors.ENDC} health left.")
+            break
+        if distance > 0:
+            if player1.range == 0 and player2.range == 0:
+                distance = max (0, distance - 2)
+            else:
+                distance = max (0, distance - 1)
+        round +=1
+        print()
+        time.sleep(2)
 
 if __name__ == "__main__":
     main()

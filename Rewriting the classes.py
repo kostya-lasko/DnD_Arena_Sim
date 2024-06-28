@@ -12,6 +12,12 @@ class Colors:
   BOLD = '\033[1m'
   UNDERLINE = '\033[4m'
 
+class Introductions(self, char_class):
+    def __init__ (self, char_class, intro)
+        self.char_class = char_class
+        self.into = intro
+        
+
 #character creation class
 class Character:
     def __init__ (self, name, char_class, health_mod):
@@ -27,6 +33,7 @@ class Character:
         self.rage = 0
         self.crit_chance = 0
     
+
     # Magic burst
     def magic_burst(self):
         if random.random() <= self.magic_chance/100:

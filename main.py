@@ -16,8 +16,16 @@ class Colors:
 class Character:
     def __init__ (self, name, char_class):
         self.name = name
-        self.char_class = char_class.lower()
-        self.health, self.damage, self.range, self.magic_chance, self.armor, self.rage, self.attacks_number = self.set_stats()
+        #self.char_class = char_class.lower()
+        self.health = (int((random.randint(2,6) + random.randint(2,6))* + 15))
+        self.damage = 0
+        self.attacks_number = 1
+        self.range = 0
+        self.magic_chance = 0
+        self.armor = 0
+        self.rage = 0
+        self.parry = 0
+     #   , self.range, self.magic_chance, self.armor, self.rage, self.attacks_number = self.set_stats()
    #sets stats based on the character class 
     def set_stats(self):
         if self.char_class == "warrior":
@@ -43,9 +51,15 @@ class Character:
 def magic_burst(character):
     if random.random() <= character.magic_chance:
         magic_type = random.choice(["damage", "healing"])
-        value = random.randint(1, 4)+1
+        value = random.randint(1,4)+1
         return magic_type, value
     return None, 0
+
+#Creating separate subsclasses for each of the classes to make their abilities more unique
+class Fighter(Character):
+    def __init__ (self, char_class):
+        self.char_class = char_class
+
 
 #combat round
 def combat_round(attacker, defender, distance):

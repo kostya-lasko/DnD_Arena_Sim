@@ -1,5 +1,6 @@
-import random, os, time
-
+import random
+import time
+import pandas as pd
 
 #adding a class for colours
 class Colors:
@@ -108,27 +109,14 @@ class Character:
                 enemy.health -= damage
         print(f"{enemy.name} has {Colors.OKGREEN}{enemy.health}{Colors.ENDC} health left.")
     
-
-    #function to print character stats
-    def print_stats(self):
-        print(f"""{self.name}'s stats are:
-{Colors.OKGREEN}Health: {self.health}{Colors.ENDC}
-Attack bonus: {self.damage_bonus}
-Range: {self.range}
-Armor: {self.armor}
-Magic chance: {Colors.OKCYAN}{self.magic_chance}%{Colors.ENDC}
-Crit chance: {Colors.FAIL}{self.crit_chance}%{Colors.ENDC}
-Dodge chance: {self.dodge_chance}%
-""")    
     #is alive
     def is_alive(self):
         return self.health > 0
-    
-    
-#Creating separate subsclasses for each of the classes to make their abilities more unique
+
+# Same class definitions as provided (Colors, Introductions, Character, Barbarian, Fighter, Mage, Monk, Ranger, Rogue, Shadow_Blade)
 class Barbarian(Character):
     def __init__ (self, name):
-        super().__init__ (name, "Barbarian", health_mod = 2.45)
+        super().__init__ (name, "Barbarian", health_mod = 2.4)
         self.damage_bonus = 3
         self.rage = 1
     
@@ -141,13 +129,13 @@ class Barbarian(Character):
 
 class Fighter(Character):
     def __init__ (self, name):
-        super().__init__ (name, "Fighter", health_mod = 2.05)
+        super().__init__ (name, "Fighter", health_mod = 2)
         self.armor = 2
         self.damage_bonus = 3
 
 class Mage(Character):
     def __init__ (self, name):
-        super().__init__(name, "Mage",health_mod = 0.85)
+        super().__init__(name, "Mage",health_mod = 0.8)
         self.range = 2
         self.magic_chance = random.randint(49,69)+30
 
@@ -179,14 +167,14 @@ class Monk(Character):
 
 class Ranger(Character):
     def __init__ (self, name):
-        super().__init__ (name, "Ranger",health_mod = 1.5)
+        super().__init__ (name, "Ranger",health_mod = 2)
         self.damage_bonus = 2
         self.range = 5
         #self.magic_chance = random.randint(0,10)+2
 
 class Rogue(Character):
     def __init__(self, name):
-        super().__init__ (name, "Rogue", health_mod = 2)
+        super().__init__ (name, "Rogue", health_mod = 1.8)
         self.damage_bonus = 1
         self.crit_chance = random.randint(50, 70)
         self.crit_mode = 4
@@ -196,13 +184,12 @@ class Shadow_Blade(Character):
         super().__init__(name, "Shadow Blade", health_mod = 2)
         self.damage_bonus = 2
         self.crit_chance = random.randint(20,30)
-        self.dodge_chance = random.randint(35,45)  #high dodge chance
+        self.dodge_chance = random.randint(35,40)  #high dodge chance
 
     def attack_enemy(self, enemy, distance):
         super().attack_enemy(enemy, distance)  
-
-#allowing players to choose their class
-def choose_class(name):
+#allowing players to choose their class automatically
+def choose_class_auto(name, class_id):
     classes = {
         "1": Fighter,
         "2": Monk,
@@ -221,72 +208,55 @@ def choose_class(name):
         "6": "Rogue",
         "7": "Shadow Blade"
     }
-   #print("Choose your class:")
-    print(f"1. Fighter")
-    print(f"2. Monk")
-    print(f"3. Mage")
-    print(f"4. Ranger")
-    print(f"5. Barbarian")
-    print(f"6. Rogue")
-    print(f"7. {Colors.UNDERLINE}Shadow Blade{Colors.ENDC}")
-    choice = input("Enter the number of your choice: ")
-    return classes[choice](name), class_names[choice]
+    return classes[class_id](name), class_names[class_id]
 
-def main():
-    os.system("clear")
-    print(f"""{Colors.OKCYAN}Welcome to the DnD Combat Arena 2.0. 
-It allows 2 players to select their characters and watch how they fight to the death on our arena!{Colors.ENDC}""")
-    player1_name = input("Player 1, choose your character name: ")
-    print("Player 1, choose your character class: ")
-    player1, player1_class = choose_class(player1_name)
-    #os.system("clear")
-    introduction = Introductions(player1_name, player1_class)
-    print (introduction.greet())
-    player1.print_stats()
+def simulate_battle(player1_class_id, player2_class_id):
+    player1_name = "Player1"
+    player2_name = "Player2"
+    player1, player1_class = choose_class_auto(player1_name, player1_class_id)
+    player2, player2_class = choose_class_auto(player2_name, player2_class_id)
 
-    player2_name = input("Player 2, choose your character name: ")
-    print("Player 2, choose your character class: ")
-    player2, player2_class = choose_class(player2_name)
-    introduction = Introductions(player2_name, player2_class)
-    print (introduction.greet())
-    player2.print_stats()
-    time.sleep(3)
-   
-    print(f"{Colors.WARNING}Let the fight begin!{Colors.ENDC}")
-    print()
-    time.sleep(2)
     distance = 4
     round = 1
     while player1.is_alive() and player2.is_alive():
-        print()
-        print (f"{Colors.OKCYAN}Current round: {round}{Colors.ENDC}")
-       
         player1.attack_enemy(player2, distance)
-        print()
         player2.attack_enemy(player1, distance)
-        if not player2.is_alive():
-            print(f"{Colors.FAIL}{player2.name} has been defeated!{Colors.ENDC} {player1.name} wins!")
-            if not player1.is_alive():
-                print(f"But wait a second! {player1.name} {Colors.FAIL} slowly falls to the ground too!{Colors.ENDC} IT IS A DRA-A-A-A-W!")
-                break
-            print(f"{player1.name} has {Colors.OKGREEN}{player1.health}{Colors.ENDC} health left.")
-            break
-
-        if not player1.is_alive():
-            print(f"{Colors.FAIL}{player1.name} has been defeated!{Colors.ENDC} {player2.name} wins!")
-            if not player2.is_alive():
-                print(f"But wait a second! {player2.name}{Colors.FAIL} slowly falls to the ground too!{Colors.ENDC} It's a draw!")
-                break
-            print(f"{player2.name} has {Colors.OKGREEN}{player2.health}{Colors.ENDC} health left.")
-            break
+        
+        if not player2.is_alive() and not player1.is_alive():
+            return "Draw", player1_class, player2_class
+        elif not player2.is_alive():
+            return player1_class, player1_class, player2_class
+        elif not player1.is_alive():
+            return player2_class, player1_class, player2_class
+        
         if distance > 0:
             if player1.range == 0 and player2.range == 0:
-                distance = max (0, distance - 2)
+                distance = max(0, distance - 2)
             else:
-                distance = max (0, distance - 1)
-        round +=1
-        print()
-        time.sleep(2)
+                distance = max(0, distance - 1)
+        round += 1
+
+def collect_statistics(num_simulations):
+    results = []
+    class_ids = ["1", "2", "3", "4", "5", "6", "7"]
+
+    for _ in range(num_simulations):
+        for class_id1 in class_ids:
+            for class_id2 in class_ids:
+                if class_id1 != class_id2:
+                    winner, player1_class, player2_class = simulate_battle(class_id1, class_id2)
+                    results.append((winner, player1_class, player2_class))
+
+    return results
+
+def main():
+    num_simulations = 1000  # Number of simulations to run
+    results = collect_statistics(num_simulations)
+    df = pd.DataFrame(results, columns=["Winner", "Player1_Class", "Player2_Class"])
+    
+    # Save the results to a CSV file
+    df.to_csv("combat_simulation_results.csv", index=False)
+    print(df.value_counts().reset_index(name="Count"))
 
 if __name__ == "__main__":
     main()

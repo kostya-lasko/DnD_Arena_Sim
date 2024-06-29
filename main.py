@@ -288,7 +288,7 @@ It allows 2 players to select their characters and watch how they fight to the d
             print()
             print(f"{Colors.FAIL}{player1.name} has been defeated! {Colors.ENDC}{player2.name} is left standing with {Colors.OKGREEN}{player2.health}{Colors.ENDC} health!")
             if not player2.is_alive():
-                print(f"But wait a second! {player2.name}{Colors.FAIL} slowly falls to the ground too!{Colors.ENDC} IT IS A DRA-A-A-A-A-A-A-W!")
+                print(f"But wait a second! {player2.name} slowly {Colors.FAIL}falls to the ground too{Colors.ENDC}! IT IS A DRA-A-A-A-A-A-A-W!")
                 break
             break
         print()

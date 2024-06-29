@@ -13,7 +13,7 @@ class Colors:
   BOLD = '\033[1m'
   UNDERLINE = '\033[4m'
 
-#a class for different intros
+#class for different intros
 class Introductions:
     def __init__ (self, player_name, player_class):
         self.player_class = player_class
@@ -26,7 +26,7 @@ class Introductions:
             "Barbarian": f"Hey, {self.player_name} the smashing {self.player_class}! May your power destroy your foes.",
             "Ranger": f"Good day, {self.player_name} the swift {self.player_class}! May your aim be true.",
             "Monk": f"Blessings, {self.player_name} the stoic {self.player_class}! May your calm mind aid you in this fight.",
-            "Shadow Blade": f"{self.player_name} slowly manifests from the shadow. May your thirst for revenge be cooled with enemy blood!"
+            "Shadow Blade": f"{self.player_name} slowly manifests from the shadows. May your thirst for revenge be cooled with enemy blood!"
             }
         return greetings.get(self.player_class)
 

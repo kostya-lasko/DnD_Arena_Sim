@@ -430,7 +430,7 @@ def game_loop():
 
                 round_num += 1
 
-             # Draw combat log with scrolling
+            # Draw combat log with scrolling
             log_x = 50 
             log_y_start = 210 
             log_display_limit = 20  # Number of log entries to display

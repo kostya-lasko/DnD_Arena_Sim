@@ -1,22 +1,4 @@
-import random, os, time, pygame
-
-# Initialize Pygame
-pygame.init()
-
-# Set up display
-WIDTH, HEIGHT = 800, 600
-window = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("DnD Combat Arena")
-
-# Colors
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-
-# Fonts
-font = pygame.font.Font(None, 30)
+import random, os, time
 
 class Colors:
     HEADER = '\033[95m'
@@ -57,22 +39,12 @@ class Character:
         self.damage_bonus = 1
         self.dodge_chance = random.randint(1, 5)
         self.health = int((random.randint(10, 20)) * health_mod + 15)
-        self.image = image # Properly initialize self.image
         self.magic_chance = 0
         self.name = name
         self.parry_chance = 0
         self.parry_damage_mod = 1
         self.rage = 0
         self.range = 0
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (random.randint(50, WIDTH-50), random.randint(50, HEIGHT-50))
-    
-    def draw(self, window):
-        window.blit(self.image, self.rect.topleft)
-
-    def update(self):
-        # Add any updates to character state
-        pass
 
     def dodge(self):
         return random.random() < self.dodge_chance / 100
